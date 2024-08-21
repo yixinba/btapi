@@ -1,0 +1,21 @@
+{
+    "name": "yixinba/btapi",
+    "description": "BT宝塔面板API接口",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "yixinba",
+            "email": "611102512@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "ext-json": "*",
+        "ext-curl": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "yixinba\\Bt\\": "src/"
+        }
+    }
+}
