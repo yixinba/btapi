@@ -692,7 +692,7 @@ class Site extends Base
         ];
         try {
             // 发送HTTP POST请求,并返回响应
-            return $this->httpPostCookie($this->getUrl('SetPHPVersion'), $data);
+            return $this->httpPostCookie($this->getUrl('SetSiteRunPath'), $data);
         } catch (Exception $e) {
             // 处理请求过程中发生的异常,返回错误信息
             return $this->error($e->getMessage());
