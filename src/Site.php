@@ -66,6 +66,8 @@ class Site extends Base
         'DelDirBinding' => '/site?action=DelDirBinding',
         // 获取网站子目录伪静态规则
         'GetDirRewrite' => '/site?action=GetDirRewrite',
+        // 设置网站运行目录
+        'SetSiteRunPath' => '/site?action=SetSiteRunPath',
         // 获取网站日志
         'GetSiteLogs' => '/site?action=GetSiteLogs',
         // 获取网站盗链状态及规则信息
@@ -676,6 +678,28 @@ class Site extends Base
         // 调用setFileBody方法,将$content写入到指定路径的配置文件中,并返回操作结果
         return $this->setFileBody("/www/server/panel/{$dir}/{$name}.conf", $content);
     }
+
+    /**
+	 * 设置网站运行目录
+	 * @param [type] $id 网站ID
+	 */
+    public function SetSiteRunPath($id,$runPath)
+    {
+        // 构建请求数据
+        $data = [
+            '$id' => $id,
+            'runPath' => $runPath
+        ];
+        try {
+            // 发送HTTP POST请求,并返回响应
+            return $this->httpPostCookie($this->getUrl('SetPHPVersion'), $data);
+        } catch (Exception $e) {
+            // 处理请求过程中发生的异常,返回错误信息
+            return $this->error($e->getMessage());
+        }
+    }
+
+    
 
     /**
      * 通过HTTP POST请求获取指定网站的根目录
