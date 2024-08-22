@@ -687,7 +687,7 @@ class Site extends Base
     {
         // 构建请求数据
         $data = [
-            '$id' => $id,
+            'id' => $id,
             'runPath' => $runPath
         ];
         try {
