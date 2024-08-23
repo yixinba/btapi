@@ -50,6 +50,10 @@ class Site extends Base
         'DelDomain' => '/site?action=DelDomain',
         // 获取可选的预定义伪静态列表
         'GetRewriteList' => '/site?action=GetRewriteList',
+	// 获取当前使用的伪静态内容
+        'GetSiteRewrite' => '/site?action=GetSiteRewrite',
+	// 设置当前使用的伪静态内容
+        'SetSiteRewrite' => '/site?action=SetSiteRewrite',
         // 获取网站根目录
         'WebPath' => '/data?action=getKey&table=sites&key=path',
         // 开启并设置网站密码访问
@@ -633,50 +637,51 @@ class Site extends Base
         }
     }
 
-    /**
-     * 根据配置状态获取相应的伪静态规则文件内容
+/**
+     * 获取当前网站的伪静态内容
      * 
-     * 本函数用于根据是否启用伪静态状态,来获取对应的伪静态规则配置文件的内容
-     * 这对于在不同环境下保持网站的伪静态规则一致性非常有用
      * 
-     * @param string $name 伪静态规则文件的名称
-     *                     这个参数指定了要获取的伪静态规则文件的名称,不包含后缀名
-     * @param bool $state 是否启用伪静态的状态
-     *                    如果为true,则表示启用伪静态,函数将返回启用状态下的规则文件内容
-     *                    如果为false,则表示未启用伪静态,函数将返回未启用状态下的规则文件内容
-     * @return mixed|array|bool 返回获取的伪静态规则文件的内容
-     *                          如果成功获取到内容,则返回文件的内容数组
-     *                          如果未启用伪静态且未找到相应的文件,则返回false
+     * @param string $siteName 网站名称,用于指定要获取伪静态规则的网站
+     * @return data bool  		返回值是data(伪静态规则内容),布尔值(表示操作成功或失败)
+     *                          如果操作成功,返回的数组中将包含指定网站的伪静态规则内容
+     *                          如果操作失败,将返回false,并通过错误函数输出错误信息
      */
-    public function getRewrite($name, $state = false)
+    public function GetSiteRewrite($siteName)
     {
-        // 根据伪静态状态确定规则文件所在的目录
-        $dir = $state ? 'vhost/rewrite' : 'rewrite/nginx';
-        // 从指定路径获取并返回文件的内容
-        return $this->getFileBody("/www/server/panel/{$dir}/{$name}.conf");
+        // 构建请求数据,包含网站名称
+        $data = [
+            'siteName' => $siteName,
+        ];
+        try {
+            // 发起HTTP POST请求,并携带cookie,请求获取伪静态规则列表的URL
+            return $this->httpPostCookie($this->getUrl('GetSiteRewrite'), $data);
+        } catch (Exception $e) {
+            // 捕获请求过程中可能出现的异常,并返回错误信息
+            return $this->error($e->getMessage());
+        }
     }
 
-    /**
-     * 设置伪静态规则
-     * 
-     * 本函数用于配置和管理伪静态规则
-     * 根据参数的不同,可以针对特定站点或全局进行设置
-     * 主要应用于nginx服务器配置中,通过定义不同的伪静态规则,来处理动态URL的显示,使其看起来像是静态页面的URL
-     * 
-     * @param string $name 规则名称,对应具体的伪静态配置文件名
-     * @param string $content 规则内容,即要写入到配置文件中的伪静态规则
-     * @param bool $site 是否为特定站点设置,默认为false表示全局设置.如果设置为true,则会将规则写入到特定站点的配置目录中
-     * 
-     * @return mixed|array|bool 返回值取决于设置的结果.
-     * - 成功设置返回true,
-     * - 失败可能返回错误信息的数组,或者在某些错误情况下返回false
-     */
-    public function setRewrite($name, $content, $site = false)
+	
+	/**
+	 * 设置当前网站的伪静态内容
+	 * @param string $siteName 网站名称,用于指定要设置伪静态规则的网站
+	 * @param string $content 规则内容,即要写入到配置文件中的伪静态规则
+     * @return bool 返回值是布尔值(表示操作失败) 
+	 */
+    public function SetSiteRewrite($siteName,$content)
     {
-        // 根据$site参数确定配置文件的存储路径
-        $dir = $site ? 'vhost/rewrite' : 'rewrite/nginx';
-        // 调用setFileBody方法,将$content写入到指定路径的配置文件中,并返回操作结果
-        return $this->setFileBody("/www/server/panel/{$dir}/{$name}.conf", $content);
+        // 构建请求数据
+        $data = [
+            'siteName' => $siteName,
+			'data' => $content,
+        ];
+        try {
+            // 发送HTTP POST请求,并返回响应
+            return $this->httpPostCookie($this->getUrl('SetSiteRewrite'), $data);
+        } catch (Exception $e) {
+            // 处理请求过程中发生的异常,返回错误信息
+            return $this->error($e->getMessage());
+        }
     }
 
     /**
