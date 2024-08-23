@@ -50,9 +50,9 @@ class Site extends Base
         'DelDomain' => '/site?action=DelDomain',
         // 获取可选的预定义伪静态列表
         'GetRewriteList' => '/site?action=GetRewriteList',
-	// 获取当前使用的伪静态内容
+		// 获取当前使用的伪静态内容
         'GetSiteRewrite' => '/site?action=GetSiteRewrite',
-	// 设置当前使用的伪静态内容
+		// 设置当前使用的伪静态内容
         'SetSiteRewrite' => '/site?action=SetSiteRewrite',
         // 获取网站根目录
         'WebPath' => '/data?action=getKey&table=sites&key=path',
@@ -115,7 +115,20 @@ class Site extends Base
         // 获取指定预定义伪静态规则内容(获取文件内容)
         'GetFileBody' => '/files?action=GetFileBody',
         // 保存伪静态规则内容(保存文件内容)
-        'SaveFileBody' => '/files?action=SaveFileBody',
+        'SaveFileBody' => '/files?action=SaveFileBody',		
+		// 获取网站重定向列表
+        'GetRedirectList' => '/site?action=GetRedirectList',
+		// 更新网站重定向
+        'ModifyRedirect' => '/site?action=ModifyRedirect',
+		// 添加网站重定向
+        'CreateRedirect' => '/site?action=CreateRedirect',
+		// 删除网站重定向
+        'DeleteRedirect' => '/site?action=DeleteRedirect',
+		// 获取重定向配置文件内容
+        'GetRedirectFile' => '/site?action=GetRedirectFile',
+		// 保存重定向配置文件内容
+        'SaveRedirectFile' => '/site?action=SaveRedirectFile',
+		
     ];
 
     /**
@@ -1301,7 +1314,159 @@ class Site extends Base
             return $this->error($e->getMessage());
         }
     }
+	
+	
+	/**
+     * 获取网站重定向列表
+     * @param [type] $siteName 网站名
+     */
+    public function GetRedirectList($siteName){
+		
+		// 构建请求数据
+        $data = [
+            'sitename' => $siteName,           
+        ];
+        try {
+            // 发送HTTP POST请求,带Cookie,用于身份验证和请求的完整性
+            return $this->httpPostCookie($this->getUrl('GetRedirectList'), $data);
+        } catch (Exception $e) {
+            // 捕获异常,返回错误信息
+            return $this->error($e->getMessage());
+        }
+    }
 
+    /**
+     * 更新网站重定向
+     * @param array
+     * @return string
+     */
+    public function ModifyRedirect($sitename,$redirectname,$tourl,$redirectdomain,$redirectpath,$redirecttype,$type,$domainorpath,$holdpath){
+		// 构建请求数据
+        $data = [
+            'sitename' => $sitename,   
+			'redirectname' => $redirectname,
+			'tourl' => $tourl,
+			'redirectdomain' => $redirectdomain,
+			'redirectpath' => $redirectpath,
+			'redirecttype' => $redirecttype,
+			'type' => $type,
+			'domainorpath' => $domainorpath,
+			'holdpath' => $holdpath,		
+        ];
+		if(is_array($data['redirectdomain'])){
+            $data['redirectdomain'] = json_encode($data['redirectdomain']);
+        }
+        try {
+            // 发送HTTP POST请求,带Cookie,用于身份验证和请求的完整性
+            return $this->httpPostCookie($this->getUrl('ModifyRedirect'), $data);
+        } catch (Exception $e) {
+            // 捕获异常,返回错误信息
+            return $this->error($e->getMessage());
+        }
+    }
+		
+
+
+    /**
+     * 添加网站重定向 
+     * @param array
+     * @return string
+     */
+    public function CreateRedirect($sitename,$redirectname,$tourl,$redirectdomain,$redirectpath,$redirecttype,$type,$domainorpath,$holdpath){
+        // 构建请求数据
+        $data = [
+            'sitename' => $sitename,   
+			'redirectname' => $redirectname,
+			'tourl' => $tourl,
+			'redirectdomain' => $redirectdomain,
+			'redirectpath' => $redirectpath,
+			'redirecttype' => $redirecttype,
+			'type' => $type,
+			'domainorpath' => $domainorpath,
+			'holdpath' => $holdpath,		
+        ];
+		if(is_array($data['redirectdomain'])){
+            $data['redirectdomain'] = json_encode($data['redirectdomain']);
+        }
+        try {
+            // 发送HTTP POST请求,带Cookie,用于身份验证和请求的完整性
+            return $this->httpPostCookie($this->getUrl('CreateRedirect'), $data);
+        } catch (Exception $e) {
+            // 捕获异常,返回错误信息
+            return $this->error($e->getMessage());
+        }
+    }	
+
+
+    /**
+     * 删除网站重定向
+     * @param $sitename
+     * @param $redirectname
+     * @return string
+     */
+    public function DeleteRedirect($sitename, $redirectname){
+		
+		// 构建请求数据
+        $data = [
+            'sitename' => $sitename,   
+			'redirectname' => $redirectname,
+        ];
+        try {
+            // 发送HTTP POST请求,带Cookie,用于身份验证和请求的完整性
+            return $this->httpPostCookie($this->getUrl('DeleteRedirect'), $data);
+        } catch (Exception $e) {
+            // 捕获异常,返回错误信息
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * 获取重定向配置文件内容
+     * @param $sitename
+     * @param $redirectname
+     * @param string $webserver
+     * @return string
+     */
+    public function GetRedirectFile($sitename,$redirectname,$webserver='nginx'){
+		// 构建请求数据
+        $data = [
+            'sitename' => $sitename,   
+			'redirectname' => $redirectname,
+			'webserver' => $webserver,
+        ];
+        try {
+            // 发送HTTP POST请求,带Cookie,用于身份验证和请求的完整性
+            return $this->httpPostCookie($this->getUrl('GetRedirectFile'), $data);
+        } catch (Exception $e) {
+            // 捕获异常,返回错误信息
+            return $this->error($e->getMessage());
+        }
+    }
+
+    /**
+     * 保存重定向配置文件内容
+     * @param [type] $path     规则名
+     * @param [type] $datas     规则内容
+     * @param string $encoding 规则编码强转utf-8
+     */
+    public function SaveRedirectFile($path,$datas,$encoding=''){
+		// 构建请求数据
+        $data = [
+            'path' => $path,   
+			'data' => $datas,
+			'encoding' => $encoding?$encoding:'utf-8'
+        ];
+        try {
+            // 发送HTTP POST请求,带Cookie,用于身份验证和请求的完整性
+            return $this->httpPostCookie($this->getUrl('SaveRedirectFile'), $data);
+        } catch (Exception $e) {
+            // 捕获异常,返回错误信息
+            return $this->error($e->getMessage());
+        }
+    }
+	
+
+	
     /**
      * 获取指定网站的代理服务器列表
      * 
