@@ -93,9 +93,9 @@ class Site extends Base
         // 关闭SSL
         'CloseSSLConf' => '/site?action=CloseSSLConf',
         // 获取网站默认文件
-        'WebGetIndex' => '/site?action=GetIndex',
+        'GetIndex' => '/site?action=GetIndex',
         // 设置网站默认文件
-        'WebSetIndex' => '/site?action=SetIndex',
+        'SetIndex' => '/site?action=SetIndex',
         // 获取网站流量限制信息
         'GetLimitNet' => '/site?action=GetLimitNet',
         // 设置网站流量限制信息
@@ -1118,7 +1118,7 @@ class Site extends Base
      * - 如果请求失败,会返回一个错误信息的字符串
      * - 在异常情况下,可能会返回布尔值false,表示请求过程中发生了异常或错误
      */
-    public function webGetIndex($id)
+    public function GetIndex($id)
     {
         // 构建请求数据,包含网站ID
         $data = [
@@ -1127,7 +1127,7 @@ class Site extends Base
         try {
             // 尝试使用HTTP POST方法,并携带Cookie进行请求,请求的URL由getUrl方法返回
             // 如果请求成功,直接返回请求的结果
-            return $this->httpPostCookie($this->getUrl('WebGetIndex'), $data);
+            return $this->httpPostCookie($this->getUrl('GetIndex'), $data);
         } catch (Exception $e) {
             // 如果请求过程中发生异常,捕获异常并返回错误信息
             return $this->error($e->getMessage());
@@ -1146,16 +1146,16 @@ class Site extends Base
      * @param string $index 指定的默认首页文件名
      * @return mixed|array|bool 返回设置结果.成功时为HTTP POST返回的数据,失败时为错误信息数组
      */
-    public function webSetIndex($id, $index)
+    public function SetIndex($id, $index)
     {
         // 构造请求数据
         $data = [
             'id' => $id,
-            'index' => $index,
+            'Index' => $index,
         ];
         try {
             // 尝试发送HTTP POST请求并返回结果
-            return $this->httpPostCookie($this->getUrl('WebSetIndex'), $data);
+            return $this->httpPostCookie($this->getUrl('SetIndex'), $data);
         } catch (Exception $e) {
             // 请求失败时返回错误信息数组
             return $this->error($e->getMessage());
