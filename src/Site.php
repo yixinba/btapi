@@ -861,7 +861,7 @@ class Site extends Base
         }
     }
 
-    /**
+     /**
      * 设置网站防盗链配置
      * 
      * 本函数用于配置网站的防盗链设置,包括设置网站ID、网站名称、文件后缀、允许的域名和状态
@@ -873,10 +873,12 @@ class Site extends Base
      * @param string $fix 网站支持的文件后缀,用于限制防盗链的文件类型
      * @param string $domains 允许访问该网站的域名列表,以逗号分隔
      * @param int $status 防盗链的状态,通常为启用或禁用
+	 * @param int $return_rule 404 
+	 * @param int $none 允许空HTTP_REFERER请求的状态,通常为启用或禁用
      * 
      * @return mixed|array|bool 根据请求结果返回不同的值,可能是处理结果的数组、错误信息的数组或布尔值FALSE
      */
-    public function setSecurity($id, $name, $fix, $domains, $status)
+    public function setSecurity($id, $name, $fix, $domains, $status, $return_rule, $none)
     {
         // 构建请求数据
         $data = [
@@ -885,6 +887,8 @@ class Site extends Base
             'fix' => $fix,
             'domains' => $domains,
             'status' => $status,
+	    'return_rule' => $return_rule,
+            'none' => $none,
         ];
         try {
             // 发送HTTP POST请求,并返回结果
