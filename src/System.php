@@ -19,7 +19,7 @@ class System extends Base
         // 获取磁盘分区信息
         'GetDiskInfo' => '/system?action=GetDiskInfo',
         // 获取实时状态信息(CPU、内存、网络、负载)
-        'GetNetWork' => '/ajax?action=GetTaskCount',
+        'GetNetWork' => '/ajax?action=GetNetWork',
         // 检查是否有安装任务
         'GetTaskCount' => '/ajax?action=GetTaskCount',
         // 检查面板更新
