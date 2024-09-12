@@ -78,8 +78,12 @@ class Site extends Base
         'GetSecurity' => '/site?action=GetSecurity',
         // 设置网站盗链状态及规则信息
         'SetSecurity' => '/site?action=SetSecurity',
+		// LINUX设置网站盗链状态及规则信息
+        'SetSecurityL' => '/site?action=SetSecurity',
         // 获取SSL状态及证书详情
         'GetSSL' => '/site?action=GetSSL',
+		// WINDOWS IIS 获取SSL状态及证书详情
+        'get_iis_ssl_bydomain' => '/site?action=get_iis_ssl_bydomain',
         // 强制HTTPS
         'HttpToHttps' => '/site?action=HttpToHttps',
         // 关闭强制HTTPS
@@ -89,7 +93,7 @@ class Site extends Base
         // 续签SSL证书
         'RenewCert' => '/acme?action=renew_cert',
         // 设置 Let's Encrypt 证书
-        'ApplyCertApi' => '/acme?action=apply_cert_api',
+        'applycertapi' => '/acme?action=apply_cert_api',
         // 关闭SSL
         'CloseSSLConf' => '/site?action=CloseSSLConf',
         // 获取网站默认文件
@@ -861,7 +865,7 @@ class Site extends Base
         }
     }
 
-     /**
+    /**
      * 设置网站防盗链配置
      * 
      * 本函数用于配置网站的防盗链设置,包括设置网站ID、网站名称、文件后缀、允许的域名和状态
@@ -887,12 +891,50 @@ class Site extends Base
             'fix' => $fix,
             'domains' => $domains,
             'status' => $status,
-	    'return_rule' => $return_rule,
+			'return_rule' => $return_rule,
             'none' => $none,
         ];
         try {
             // 发送HTTP POST请求,并返回结果
             return $this->httpPostCookie($this->getUrl('SetSecurity'), $data);
+        } catch (Exception $e) {
+            // 请求失败时,返回错误信息
+            return $this->error($e->getMessage());
+        }
+    }
+	
+	/**
+     * LINUX设置网站防盗链配置
+     * 
+     * 本函数用于配置网站的防盗链设置,包括设置网站ID、网站名称、文件后缀、允许的域名和状态
+     * 通过发送HTTP POST请求来提交这些配置到指定的URL,以更新网站的防盗链规则
+     * 如果请求成功,将返回处理结果,否则将返回错误信息
+     * 
+     * @param int $id 网站的唯一标识ID,用于识别不同的网站
+     * @param string $name 网站的名称,用于友好显示
+     * @param string $fix 网站支持的文件后缀,用于限制防盗链的文件类型
+     * @param string $domains 允许访问该网站的域名列表,以逗号分隔
+     * @param int $status 防盗链的状态,通常为启用或禁用
+	 * @param int $return_rule 404 
+	 * @param int $http_status 允许空HTTP_REFERER请求的状态,通常为启用或禁用
+     * 
+     * @return mixed|array|bool 根据请求结果返回不同的值,可能是处理结果的数组、错误信息的数组或布尔值FALSE
+     */
+    public function SetSecurityL($id, $name, $fix, $domains, $status, $return_rule, $nonestatus)
+    {
+        // 构建请求数据
+        $data = [
+            'id' => $id,
+            'name' => $name,
+            'fix' => $fix,
+            'domains' => $domains,
+            'status' => $status,
+			'return_rule' => $return_rule,
+            'http_status' => $nonestatus,
+        ];
+        try {
+            // 发送HTTP POST请求,并返回结果
+            return $this->httpPostCookie($this->getUrl('SetSecurityL'), $data);
         } catch (Exception $e) {
             // 请求失败时,返回错误信息
             return $this->error($e->getMessage());
@@ -935,7 +977,7 @@ class Site extends Base
      * @param string $siteName 网站的域名,不包含协议部分(例如,www.example.com)
      * @return mixed|array|bool 如果请求成功,返回服务端响应的数据;如果请求失败,返回错误信息
      */
-    public function httpToHttps($siteName)
+    public function HttpToHttps($siteName)
     {
         // 构建请求数据
         $data = [
@@ -1089,6 +1131,30 @@ class Site extends Base
             return $this->error($e->getMessage());
         }
     }
+	
+	/**
+     * WINDOWS IIS 获取指定网站的SSL状态及证书信息
+     * 
+     * 本函数通过发送HTTP POST请求,获取指定网站的SSL证书详细信息
+     * 主要用于检测网站是否启用了SSL,并获取相关证书信息,以评估网站的安全性
+     * 
+     * @param string $siteName 域名,不包含协议部分(如http://或https://),仅提供域名本身
+     * @return mixed|array|bool 如果请求成功,返回一个包含SSL信息的数组;如果请求失败,返回false;在异常情况下,返回错误信息
+     */
+    public function get_iis_ssl_bydomain($siteName)
+    {
+        // 构建请求数据,包含要查询的域名
+        $data = [
+            'siteName' => $siteName,
+        ];
+        try {
+            // 发送HTTP POST请求,并返回请求结果
+            return $this->httpPostCookie($this->getUrl('get_iis_ssl_bydomain'), $data);
+        } catch (Exception $e) {
+            // 在请求过程中发生异常时,返回错误信息
+            return $this->error($e->getMessage());
+        }
+    }
 
     /**
      * 设置 Let's Encrypt 证书
@@ -1103,19 +1169,19 @@ class Site extends Base
      * 
      * @return mixed|array|bool 返回值可以是数组(申请成功的证书信息)、布尔值(false表示申请失败)或其他类型
      */
-    public function getApplyCertApi($id = 0, $domain = '')
-    {
+    public function applycertapi($id, $domain)
+    {		
         // 构建请求数据,包含域名、认证方式、认证目标ID等信息
         $data = [
-            'domains' => [$domain],
+            'domains' => $domain,              
             'auth_type' => 'http',
             'auth_to' => $id,
             'auto_wildcard' => 0,
             'id' => $id,
         ];
         try {
-            // 尝试通过 HTTP POST 方法并使用 Cookie 认证发送请求来申请证书
-            return $this->httpPostCookie($this->getUrl('ApplyCertApi'), $data);
+            // 尝试通过 HTTP POST 方法并使用 Cookie 认证发送请求来申请证书			
+            return $this->httpPostCookie($this->getUrl('applycertapi'), $data);
         } catch (Exception $e) {
             // 如果在请求过程中发生异常,返回错误信息
             return $this->error($e->getMessage());
